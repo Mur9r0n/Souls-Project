@@ -1658,13 +1658,14 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1346050609}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bf2a0085b9699a84aaf8a9a5ccf62103, type: 3}
+  m_Script: {fileID: 11500000, guid: 0c2a34a6d585954488b274d65a20451e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  LookSpeed: 0.03
-  InvertY: 0
+  Names:
+  - GamePad
+  - Mouse and Keyboard
 --- !u!114 &1346050614
 MonoBehaviour:
   m_ObjectHideFlags: 0
