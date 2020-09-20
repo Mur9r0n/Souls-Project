@@ -48,7 +48,7 @@ public class @PlayerInputs : IInputActionCollection, IDisposable
                     ""name"": ""WASD"",
                     ""id"": ""b69fb0b9-e13c-42ac-8583-fc3813da9542"",
                     ""path"": ""2DVector"",
-                    ""interactions"": ""Hold(duration=0.01,pressPoint=0.01),Press(pressPoint=0.01)"",
+                    ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Movement"",

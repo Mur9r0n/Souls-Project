@@ -5,37 +5,23 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
-    private PlayerInputs m_inputs;
+    private CharacterController m_controller = null;
+    private Animator m_anim = null;
+    private PlayerInputs m_inputs = null;
+    private Transform m_mainCameraTransform = null;
 
-    [SerializeField]
-    Rigidbody m_rigidbody;
-    [SerializeField]
-    CharacterController m_controller;
-    [SerializeField]
-    Animator m_anim;
-
-    [SerializeField]
-    Transform m_groundCheck;
-    [SerializeField]
-    LayerMask m_groundMask;
-    [SerializeField]
-    bool m_isGrounded;
-
-    [SerializeField]
-    float m_groundDistance = 0.4f;
-    [SerializeField]
-    float m_movementSpeed = 5.0f;
-    [SerializeField]
-    float m_jumpHeight = 2.0f;
-    [SerializeField]
-    float m_gravity = -20f;
-
-    private Vector3 m_velocity;
+    [SerializeField, Tooltip("Speed in which the Character moves.")] private float m_movementSpeed = 5.0f;
+    private float m_currentSpeed = 0f;
+    private float m_speedSmoothVelocity = 0f;
+    private float m_speedSmoothTime = 0.1f;
+    private float m_rotationSpeed = 0.1f;
 
     private void Awake()
     {
         m_inputs = new PlayerInputs();
-        //m_inputs.Player.Movement.started += _context => Movement(_context.ReadValue<Vector2>());
+        m_controller = GetComponent<CharacterController>();
+        m_anim = GetComponent<Animator>();
+        m_mainCameraTransform = Camera.main.transform;
     }
 
     private void Start()
@@ -46,38 +32,48 @@ public class PlayerController : MonoBehaviour
     private void Update()
     {
         Movement(m_inputs.Player.Movement.ReadValue<Vector2>());
-        //Jump(m_inputs.Player.Jump.performed);//Jump();
         Gravity();
     }
 
-    public void Movement(Vector2 _direction)
+    public void Movement(/*InputAction.CallbackContext*/Vector2 _context)
     {
-        Debug.Log("Movement " + _direction);
-        m_isGrounded = Physics.CheckSphere(m_groundCheck.position, m_groundDistance, m_groundMask);
-
-        if (m_isGrounded && m_velocity.y < 0.0f)
+        if (_context != Vector2.zero)
         {
-            m_velocity.y = -2.0f;
+            //Vector2 movementInput = new Vector2(_context.ReadValue<Vector2>().x, _context.ReadValue<Vector2>().y);
+            Vector2 movementInput = new Vector2(_context.x, _context.y);
+
+            Vector3 forward = m_mainCameraTransform.forward;
+            Vector3 right = m_mainCameraTransform.right;
+            forward.y = 0;
+            right.y = 0;
+
+            forward.Normalize();
+            right.Normalize();
+
+            Vector3 desiredMoveDirection = (forward * movementInput.y + right * movementInput.x).normalized;
+
+            if (desiredMoveDirection != Vector3.zero)
+            {
+                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(desiredMoveDirection), m_rotationSpeed);
+            }
+
+            float TargetSpeed = m_movementSpeed * movementInput.magnitude;
+            m_currentSpeed = Mathf.SmoothDamp(m_currentSpeed, TargetSpeed, ref m_speedSmoothVelocity, m_speedSmoothTime);
+
+            m_controller.Move(desiredMoveDirection * m_currentSpeed * Time.deltaTime);
         }
-        //m_controller.Move(new Vector3(_direction.x, 0, _direction.y) * m_movementSpeed * Time.deltaTime);
-
-        m_controller.Move(transform.forward * _direction.y * m_movementSpeed * Time.deltaTime);
-        transform.Rotate(transform.up * _direction.x * 125 * Time.deltaTime);
     }
-
-    //private void Jump()
-    //{
-    //    if (m_isGrounded)
-    //    {
-    //        m_velocity.y = Mathf.Sqrt(m_jumpHeight * -2.0f * m_gravity);
-    //    }
-    //}
 
     private void Gravity()
     {
-        m_velocity.y += m_gravity * Time.deltaTime;
+        Vector3 gravityVector = Vector3.zero;
 
-        m_controller.Move(m_velocity * Time.deltaTime);
+        if (!m_controller.isGrounded)
+        {
+            gravityVector.y += Physics.gravity.y;
+        }
+
+        m_controller.Move(gravityVector * Time.deltaTime);
     }
 
     private void OnEnable()
