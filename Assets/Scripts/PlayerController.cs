@@ -16,12 +16,28 @@ public class PlayerController : MonoBehaviour
     private float m_speedSmoothTime = 0.1f;
     private float m_rotationSpeed = 0.1f;
 
+    //TEST
+    bool isSprinting = false;
+
     private void Awake()
     {
         m_inputs = new PlayerInputs();
         m_controller = GetComponent<CharacterController>();
         m_anim = GetComponent<Animator>();
         m_mainCameraTransform = Camera.main.transform;
+
+        #region Input Action
+        m_inputs.Player.Dodge.performed += _ => Dodge();
+        m_inputs.Player.LightAttack.performed += _ => LightAttack();
+        m_inputs.Player.HeavyAttack.performed += _ => HeavyAttack();
+        m_inputs.Player.TargetSystem.performed += _ => TargetSystem();
+        m_inputs.Player.Sprint.performed += _ => Sprint();
+        m_inputs.Player.Use.performed += _ => Use();
+        m_inputs.Player.Interaction.performed += _ => Interaction();
+        m_inputs.Player.SwitchItems.performed += _ => SwitchItems(m_inputs.Player.SwitchItems.ReadValue<float>());
+        m_inputs.Player.OpenInventory.performed += _ => OpenInventory();
+        m_inputs.Player.OpenMenu.performed += _ => OpenMenu();
+        #endregion
     }
 
     private void Start()
@@ -58,10 +74,15 @@ public class PlayerController : MonoBehaviour
             }
 
             float TargetSpeed = m_movementSpeed * movementInput.magnitude;
-            m_currentSpeed = Mathf.SmoothDamp(m_currentSpeed, TargetSpeed, ref m_speedSmoothVelocity, m_speedSmoothTime);
+            if (isSprinting)
+                m_currentSpeed = 13;
+            else
+                m_currentSpeed = Mathf.SmoothDamp(m_currentSpeed, TargetSpeed, ref m_speedSmoothVelocity, m_speedSmoothTime);
 
             m_controller.Move(desiredMoveDirection * m_currentSpeed * Time.deltaTime);
+
         }
+        m_anim.SetFloat("MovementSpeed", _context.magnitude);
     }
 
     private void Gravity()
@@ -74,6 +95,58 @@ public class PlayerController : MonoBehaviour
         }
 
         m_controller.Move(gravityVector * Time.deltaTime);
+    }
+
+    public void Dodge()
+    {
+        Debug.Log("Dodge");
+    }
+
+    public void LightAttack()
+    {
+        Debug.Log("Light Attack");
+    }
+
+    public void HeavyAttack()
+    {
+        Debug.Log("Heavy Attack");
+    }
+
+    public void TargetSystem()
+    {
+        Debug.Log("Target System");
+    }
+
+    public void Sprint()
+    {
+        Debug.Log("Sprint");
+
+        isSprinting = !isSprinting;
+    }
+
+    public void Use()
+    {
+        Debug.Log("Use");
+    }
+
+    public void Interaction()
+    {
+        Debug.Log("Interaction");
+    }
+
+    public void SwitchItems(float _context)
+    {
+        Debug.Log("Switch Items");
+    }
+
+    public void OpenInventory()
+    {
+        Debug.Log("Open Inventory");
+    }
+
+    public void OpenMenu()
+    {
+        Debug.Log("Open Menu");
     }
 
     private void OnEnable()
