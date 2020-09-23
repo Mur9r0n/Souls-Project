@@ -48,8 +48,9 @@ public class PlayerController : MonoBehaviour
 
     private void Start()
     {
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        //Cursor.lockState = CursorLockMode.Locked;
+        //Cursor.visible = false;
+        Debug.Log(Application.persistentDataPath);
     }
     private void Update()
     {
@@ -163,5 +164,35 @@ public class PlayerController : MonoBehaviour
     private void OnDisable()
     {
         m_inputs.Disable();
+    }
+
+    private void OnGUI()
+    {
+        if (GUI.Button(new Rect(10, 10, 150, 100), "Damage"))
+        {
+            m_currentHealth -= 10;
+        }
+
+        if (GUI.Button(new Rect(10, 150, 150, 100), "Save" ))
+        {
+            DataManager.Instance.SavePlayer(this);
+            Debug.Log("Saved");
+        }
+
+        if (GUI.Button(new Rect(10, 300, 150, 100), "Load"))
+        {
+            PlayerData temp = DataManager.Instance.LoadPlayer();
+
+            m_currentHealth = temp.m_CurrentHealth;
+            m_maxHealth = temp.m_MaxHealth;
+
+            Vector3 temppos = new Vector3(temp.m_Position[0], temp.m_Position[1], temp.m_Position[2]);
+            m_controller.enabled = false;
+            transform.position = temppos;
+            m_controller.enabled = true;
+
+            Debug.Log(temppos);
+        }
+
     }
 }
