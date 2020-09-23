@@ -10,11 +10,17 @@ public class PlayerController : MonoBehaviour
     private PlayerInputs m_inputs = null;
     private Transform m_mainCameraTransform = null;
 
+    //private variables
     [SerializeField, Tooltip("Speed in which the Character moves.")] private float m_movementSpeed = 5.0f;
     private float m_currentSpeed = 0f;
     private float m_speedSmoothVelocity = 0f;
     private float m_speedSmoothTime = 0.1f;
     private float m_rotationSpeed = 0.1f;
+
+
+    //public variables
+    public int m_maxHealth = 100;
+    public int m_currentHealth = 80;
 
     //TEST
     bool isSprinting = false;
