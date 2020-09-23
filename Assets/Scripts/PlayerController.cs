@@ -82,7 +82,7 @@ public class PlayerController : MonoBehaviour
             m_controller.Move(desiredMoveDirection * m_currentSpeed * Time.deltaTime);
 
         }
-        m_anim.SetFloat("MovementSpeed", _context.magnitude);
+        //m_anim.SetFloat("MovementSpeed", _context.magnitude);
     }
 
     private void Gravity()
