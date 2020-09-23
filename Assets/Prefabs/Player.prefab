@@ -185,7 +185,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 4684556437170541582}
         m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
-        m_MethodName: Dodge
+        m_MethodName: 
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -194,14 +194,14 @@ MonoBehaviour:
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
-        m_CallState: 2
+        m_CallState: 0
     m_ActionId: 12437b0e-7fe5-41f1-b5ab-0af07b7868b0
     m_ActionName: Player/Dodge[/Keyboard/space,/DualShock4GamepadHID/buttonEast]
   - m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 4684556437170541582}
         m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
-        m_MethodName: LightAttack
+        m_MethodName: 
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -217,7 +217,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 4684556437170541582}
         m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
-        m_MethodName: HeavyAttack
+        m_MethodName: 
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -233,7 +233,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 4684556437170541582}
         m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
-        m_MethodName: TargetSystem
+        m_MethodName: 
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -249,7 +249,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 4684556437170541582}
         m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
-        m_MethodName: Sprint
+        m_MethodName: 
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -265,7 +265,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 4684556437170541582}
         m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
-        m_MethodName: Use
+        m_MethodName: 
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -281,7 +281,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 4684556437170541582}
         m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
-        m_MethodName: Interaction
+        m_MethodName: 
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -297,8 +297,8 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 4684556437170541582}
         m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
-        m_MethodName: SwitchItems
-        m_Mode: 4
+        m_MethodName: 
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -313,7 +313,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 4684556437170541582}
         m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
-        m_MethodName: OpenInventory
+        m_MethodName: 
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -329,7 +329,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 4684556437170541582}
         m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
-        m_MethodName: OpenMenu
+        m_MethodName: 
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
