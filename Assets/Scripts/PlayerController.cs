@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -9,6 +10,7 @@ public class PlayerController : MonoBehaviour
     private Animator m_anim = null;
     private PlayerInputs m_inputs = null;
     private Transform m_mainCameraTransform = null;
+    [SerializeField] CinemachineFreeLook m_cinemachineFreeLook = null;
 
     //private variables
     [SerializeField, Tooltip("Speed in which the Character moves.")] private float m_movementSpeed = 5.0f;
@@ -31,7 +33,7 @@ public class PlayerController : MonoBehaviour
         m_controller = GetComponent<CharacterController>();
         m_anim = GetComponent<Animator>();
         m_mainCameraTransform = Camera.main.transform;
-
+        
         #region Input Action
         m_inputs.Player.Dodge.performed += _ => Dodge();
         m_inputs.Player.LightAttack.performed += _ => LightAttack();
@@ -88,6 +90,14 @@ public class PlayerController : MonoBehaviour
 
             m_controller.Move(desiredMoveDirection * m_currentSpeed * Time.deltaTime);
 
+            if (!m_cinemachineFreeLook.m_RecenterToTargetHeading.m_enabled)
+            {
+                m_cinemachineFreeLook.m_RecenterToTargetHeading.m_enabled = true;
+            }
+        }
+        else
+        {
+            m_cinemachineFreeLook.m_RecenterToTargetHeading.m_enabled = false;
         }
         //m_anim.SetFloat("MovementSpeed", _context.magnitude);
     }
