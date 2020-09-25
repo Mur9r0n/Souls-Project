@@ -11,8 +11,8 @@ public class PlayerData
 
     public PlayerData(PlayerController _controller)
     {
-        m_CurrentHealth = _controller.m_currentHealth;
-        m_MaxHealth = _controller.m_maxHealth;
+        m_CurrentHealth = _controller.m_CurrentHealth;
+        m_MaxHealth = _controller.m_MaxHealth;
 
         m_Position = new float[3];
         m_Position[0] = _controller.transform.position.x;

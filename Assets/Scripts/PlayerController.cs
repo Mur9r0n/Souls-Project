@@ -19,8 +19,8 @@ public class PlayerController : MonoBehaviour
 
 
     //public variables
-    public int m_maxHealth = 100;
-    public int m_currentHealth = 80;
+    public int m_MaxHealth = 100;
+    public int m_CurrentHealth = 80;
 
     //TEST
     bool isSprinting = false;
@@ -80,11 +80,11 @@ public class PlayerController : MonoBehaviour
                 transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(desiredMoveDirection), m_rotationSpeed);
             }
 
-            float TargetSpeed = m_movementSpeed * movementInput.magnitude;
+            float targetSpeed = m_movementSpeed * movementInput.magnitude;
             if (isSprinting)
                 m_currentSpeed = 13;
             else
-                m_currentSpeed = Mathf.SmoothDamp(m_currentSpeed, TargetSpeed, ref m_speedSmoothVelocity, m_speedSmoothTime);
+                m_currentSpeed = Mathf.SmoothDamp(m_currentSpeed, targetSpeed, ref m_speedSmoothVelocity, m_speedSmoothTime);
 
             m_controller.Move(desiredMoveDirection * m_currentSpeed * Time.deltaTime);
 
@@ -170,7 +170,7 @@ public class PlayerController : MonoBehaviour
     {
         if (GUI.Button(new Rect(10, 10, 150, 100), "Damage"))
         {
-            m_currentHealth -= 10;
+            m_CurrentHealth -= 10;
         }
 
         if (GUI.Button(new Rect(10, 150, 150, 100), "Save" ))
@@ -183,8 +183,8 @@ public class PlayerController : MonoBehaviour
         {
             PlayerData temp = DataManager.Instance.LoadPlayer();
 
-            m_currentHealth = temp.m_CurrentHealth;
-            m_maxHealth = temp.m_MaxHealth;
+            m_CurrentHealth = temp.m_CurrentHealth;
+            m_MaxHealth = temp.m_MaxHealth;
 
             Vector3 temppos = new Vector3(temp.m_Position[0], temp.m_Position[1], temp.m_Position[2]);
             m_controller.enabled = false;
