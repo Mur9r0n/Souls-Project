@@ -1,35 +1,50 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using TreeEditor;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Animations;
+using UnityEngine.Rendering.UI;
 
 namespace KI.Sheep
 {
     public class SheepController : MonoBehaviour
     {
-        public string m_CurrentState;
-        public NavMeshAgent m_Agent;
+        #region Components and Vectors
+
+        private NavMeshAgent m_Agent;
         public Vector3? TargetPosition { get; set; }
-        public Vector3 OriginPosition { get; set; }
-        public Quaternion OriginRotation { get; set; }
+        public Vector3 OriginalPosition { get; set; }
+        public Quaternion OriginalRotation { get; set; }
 
-        public float AttackDistance
-        {
-            get { return m_attackDistance; }
-        }
+        #endregion
 
-        [SerializeField] private float m_attackDistance;
-        [SerializeField] private float m_maxHealthPoints;
-        [SerializeField] private float m_currentHealthPoints;
-        private bool m_playerFound = false;
+        [SerializeField, Tooltip("Maximum Healthpoints.")]
+        private float m_maxHealthPoints;
 
+        [SerializeField, Tooltip("Current Healthpoints.")]
+        private float m_currentHealthPoints;
+
+        [SerializeField, Tooltip("Distance at with the GameObject is able to Attack.")]
+        private float m_attackDistance;
+
+        [SerializeField, Tooltip("Field of View Distance."), Range(1f, 100f)]
+        private float m_fovDistance = 1f;
+
+        [SerializeField, Tooltip("Field of View Angle."), Range(0f, 90f)]
+        private float m_fovAngle = 1f;
+
+        
+        
         private ABaseState m_activeState;
         private SheepIdleState m_idleState;
 
         private void Start()
         {
             m_Agent = GetComponent<NavMeshAgent>();
-            OriginPosition = transform.position;
-            OriginRotation = transform.rotation;
+            OriginalPosition = transform.position;
+            OriginalRotation = transform.rotation;
 
             m_idleState = new SheepIdleState();
             SheepAttackState m_attackState = new SheepAttackState();
@@ -59,7 +74,7 @@ namespace KI.Sheep
 
         private void Update()
         {
-            LookForPlayer();
+            PlayerInFOV();
             if (m_activeState is object)
             {
                 m_activeState.Update();
@@ -86,33 +101,65 @@ namespace KI.Sheep
             }
         }
 
-        public void LookForPlayer()
+        public bool PlayerInFOV()
         {
-            RaycastHit hit;
-            if (Physics.Raycast(transform.position + new Vector3(0, 1, 1),
-                transform.TransformDirection(Vector3.forward), out hit,
-                Mathf.Infinity))
+            Vector3 playerposition = GameManager.Instance.PlayerTransform.position;
+            Vector3 origin = transform.position + new Vector3(0,1,0);
+            Vector3 directionToPlayer = (playerposition + new Vector3(0,1,0)) -
+                                        origin;
+            // Debug.Log(Vector3.SignedAngle(dir, transform.forward, Vector3.forward));
+
+            if (Vector3.SignedAngle(directionToPlayer, transform.forward, Vector3.forward) <= m_fovAngle &&
+                Vector3.SignedAngle(directionToPlayer, transform.forward, Vector3.forward) >= -m_fovAngle)
             {
-                Debug.Log(("Hit Something!"));
-                if (hit.collider.gameObject.CompareTag("Player"))
+                // Debug.Log("Player in FOV!");
+                RaycastHit hit;
+                if (Vector3.Distance(origin, playerposition) <= m_fovDistance)
                 {
-                    Debug.DrawRay(transform.position + new Vector3(0, 1, 1),
-                        transform.TransformDirection(Vector3.forward) * hit.distance, Color.green);
-                    Debug.Log($"Hit Player {hit.collider.gameObject.name}!");
-                }
-                else
-                {
-                    Debug.DrawRay(transform.position + new Vector3(0, 1, 1),
-                        transform.TransformDirection(Vector3.forward) * 1000, Color.blue);
-                    Debug.Log($"Hit was {hit.collider.gameObject.name}!");
+                    if (Physics.Raycast(origin, directionToPlayer, out hit, m_fovDistance))
+                    {
+                        if (hit.collider.gameObject.CompareTag("Player"))
+                        {
+                            // Debug.Log("Player hit!");
+                            Debug.DrawRay(origin, directionToPlayer, Color.green,
+                                5f);
+                            return true;
+                        }
+                        else
+                        {
+                            // Debug.Log("Hit something else!");
+                            Debug.DrawRay(origin, directionToPlayer, Color.red, 5f);
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        Debug.Log(("Can't Hit something!"));
+                        return false;
+                    }
                 }
             }
             else
             {
-                Debug.DrawRay(transform.position + new Vector3(0, 1, 1),
-                    transform.TransformDirection(Vector3.forward) * 1000, Color.blue);
-                Debug.Log("Hit wasn't Player!");
+                // Debug.Log("Player behind FOV!");
+                return false;
             }
+
+            return false;
+        }
+
+        private void OnDrawGizmos()
+        {
+            Vector3 FovLine1 = Quaternion.AngleAxis(m_fovAngle, transform.up) * transform.forward * m_fovDistance;
+            Vector3 FovLine2 = Quaternion.AngleAxis(-m_fovAngle, transform.up) * transform.forward * m_fovDistance;
+            
+            Gizmos.color = Color.magenta;
+            Gizmos.DrawWireSphere(transform.position, m_fovDistance);
+            
+            Gizmos.color = Color.black;
+            Gizmos.DrawRay(transform.position,FovLine1);
+            Gizmos.DrawRay(transform.position,FovLine2);
+
         }
     }
 }

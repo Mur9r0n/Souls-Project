@@ -10,21 +10,16 @@ public class PlayerController : MonoBehaviour
     private Animator m_anim = null;
     private PlayerInputs m_inputs = null;
     private Transform m_mainCameraTransform = null;
+    [SerializeField, Tooltip("FreeLookCamera to Follow the Player.")] private CinemachineFreeLook m_cinemachineFreeLook = null;
 
-    [SerializeField, Tooltip("FreeLookCamera to Follow the Player.")]
-    private CinemachineFreeLook m_cinemachineFreeLook = null;
-
-    [SerializeField, Tooltip("Speed in which the Character moves.")]
-    private float m_movementSpeed = 5.0f;
-
+    [SerializeField, Tooltip("Speed in which the Character moves.")] private float m_movementSpeed = 5.0f;
     private float m_currentSpeed = 0f;
     private float m_speedSmoothVelocity = 0f;
     private float m_speedSmoothTime = 0.1f;
     private float m_rotationSpeed = 0.1f;
 
-    [SerializeField, Tooltip("Enable Gravity?")]
-    private bool m_useGravity = true;
-
+    [SerializeField, Tooltip("Enable Gravity?")] private bool m_useGravity = true;
+    
     [Tooltip("Maximum Healthpoints.")] public int m_MaxHealth = 100;
     [Tooltip("Current Healthpoints.")] public int m_CurrentHealth = 80;
 
@@ -37,9 +32,8 @@ public class PlayerController : MonoBehaviour
         m_controller = GetComponent<CharacterController>();
         m_anim = GetComponent<Animator>();
         m_mainCameraTransform = Camera.main.transform;
-
+        
         #region Input Action
-
         m_inputs.Player.Dodge.performed += _ => Dodge();
         m_inputs.Player.LightAttack.performed += _ => LightAttack();
         m_inputs.Player.HeavyAttack.performed += _ => HeavyAttack();
@@ -50,7 +44,6 @@ public class PlayerController : MonoBehaviour
         m_inputs.Player.SwitchItems.performed += _ => SwitchItems(m_inputs.Player.SwitchItems.ReadValue<float>());
         m_inputs.Player.OpenInventory.performed += _ => OpenInventory();
         m_inputs.Player.OpenMenu.performed += _ => OpenMenu();
-
         #endregion
     }
 
@@ -59,14 +52,13 @@ public class PlayerController : MonoBehaviour
         //Cursor.lockState = CursorLockMode.Locked;
         //Cursor.visible = false;
     }
-
     private void Update()
     {
         Movement(m_inputs.Player.Movement.ReadValue<Vector2>());
         if (m_useGravity) Gravity();
     }
 
-    public void Movement( /*InputAction.CallbackContext*/ Vector2 _context)
+    public void Movement(/*InputAction.CallbackContext*/Vector2 _context)
     {
         if (_context != Vector2.zero)
         {
@@ -85,16 +77,14 @@ public class PlayerController : MonoBehaviour
 
             if (desiredMoveDirection != Vector3.zero)
             {
-                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(desiredMoveDirection),
-                    m_rotationSpeed);
+                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(desiredMoveDirection), m_rotationSpeed);
             }
 
             float TargetSpeed = m_movementSpeed * movementInput.magnitude;
             if (isSprinting)
                 m_currentSpeed = 13;
             else
-                m_currentSpeed = Mathf.SmoothDamp(m_currentSpeed, TargetSpeed, ref m_speedSmoothVelocity,
-                    m_speedSmoothTime);
+                m_currentSpeed = Mathf.SmoothDamp(m_currentSpeed, TargetSpeed, ref m_speedSmoothVelocity, m_speedSmoothTime);
 
             m_controller.Move(desiredMoveDirection * m_currentSpeed * Time.deltaTime);
 
@@ -107,7 +97,6 @@ public class PlayerController : MonoBehaviour
         {
             m_cinemachineFreeLook.m_RecenterToTargetHeading.m_enabled = false;
         }
-
         //m_anim.SetFloat("MovementSpeed", _context.magnitude);
     }
 
@@ -192,7 +181,7 @@ public class PlayerController : MonoBehaviour
             m_CurrentHealth -= 10;
         }
 
-        if (GUI.Button(new Rect(10, 150, 150, 100), "Save"))
+        if (GUI.Button(new Rect(10, 150, 150, 100), "Save" ))
         {
             DataManager.Instance.SavePlayer(this);
             Debug.Log("Saved");
@@ -212,5 +201,6 @@ public class PlayerController : MonoBehaviour
 
             Debug.Log(temppos);
         }
+
     }
 }
