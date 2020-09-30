@@ -1,10 +1,7 @@
-﻿namespace KI.Sheep
+﻿public class SheepResetState : ABaseState
 {
-    public class SheepResetState : ABaseState
+    public override void Update()
     {
-        public override void Update()
-        {
-            throw new System.NotImplementedException();
-        }
+        throw new System.NotImplementedException();
     }
 }

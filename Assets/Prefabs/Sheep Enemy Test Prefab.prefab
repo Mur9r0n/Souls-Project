@@ -226,8 +226,8 @@ MonoBehaviour:
   m_maxHealthPoints: 0
   m_currentHealthPoints: 0
   m_attackDistance: 0
-  m_fovDistance: 20
-  m_fovAngle: 50
+  m_fovDistance: 29.3
+  m_fovAngle: 27.9
 --- !u!195 &6695922510192587913
 NavMeshAgent:
   m_ObjectHideFlags: 0

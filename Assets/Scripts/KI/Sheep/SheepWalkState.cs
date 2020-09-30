@@ -1,10 +1,10 @@
-﻿namespace KI.Sheep
+﻿using UnityEngine;
+
+public class SheepWalkState : ABaseState
 {
-    public class SheepWalkState : ABaseState
+    public override void Update()
     {
-        public override void Update()
-        {
-            throw new System.NotImplementedException();
-        }
+        Debug.Log(m_controller);
+        Debug.Log("Hai wir d Update!");
     }
 }

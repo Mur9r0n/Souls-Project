@@ -1,165 +1,152 @@
-﻿using System;
-using System.Collections.Generic;
-using TreeEditor;
-using UnityEditor;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.Animations;
-using UnityEngine.Rendering.UI;
 
-namespace KI.Sheep
+public class SheepController : MonoBehaviour
 {
-    public class SheepController : MonoBehaviour
+    #region Components and Vectors
+
+    public NavMeshAgent m_Agent;
+    public Vector3? TargetPosition { get; set; }
+    public Vector3 OriginalPosition { get; set; }
+    public Quaternion OriginalRotation { get; set; }
+
+    #endregion
+
+    [SerializeField, Tooltip("Maximum Healthpoints.")]
+    private float m_maxHealthPoints;
+
+    [SerializeField, Tooltip("Current Healthpoints.")]
+    private float m_currentHealthPoints;
+
+    [SerializeField, Tooltip("Distance at with the GameObject is able to Attack.")]
+    private float m_attackDistance;
+
+    [SerializeField, Tooltip("Field of View Distance."), Range(1f, 100f)]
+    private float m_fovDistance = 1f;
+
+    [SerializeField, Tooltip("Field of View Angle."), Range(0f, 90f)]
+    private float m_fovAngle = 1f;
+
+    private ABaseState m_activeState;
+    private SheepIdleState m_idleState;
+
+    private void Start()
     {
-        #region Components and Vectors
+        m_Agent = GetComponent<NavMeshAgent>();
+        OriginalPosition = transform.position;
+        OriginalRotation = transform.rotation;
 
-        private NavMeshAgent m_Agent;
-        public Vector3? TargetPosition { get; set; }
-        public Vector3 OriginalPosition { get; set; }
-        public Quaternion OriginalRotation { get; set; }
+        m_idleState = new SheepIdleState();
+        SheepAttackState m_attackState = new SheepAttackState();
+        // SheepResetState m_resetState = new SheepResetState();
+        SheepWalkState m_walkState = new SheepWalkState();
 
-        #endregion
-
-        [SerializeField, Tooltip("Maximum Healthpoints.")]
-        private float m_maxHealthPoints;
-
-        [SerializeField, Tooltip("Current Healthpoints.")]
-        private float m_currentHealthPoints;
-
-        [SerializeField, Tooltip("Distance at with the GameObject is able to Attack.")]
-        private float m_attackDistance;
-
-        [SerializeField, Tooltip("Field of View Distance."), Range(1f, 100f)]
-        private float m_fovDistance = 1f;
-
-        [SerializeField, Tooltip("Field of View Angle."), Range(0f, 90f)]
-        private float m_fovAngle = 1f;
-
+        m_idleState.SheepInit(this, new KeyValuePair<ABaseState.TransitionDelegate, ABaseState>
+            (
+                () => Test(), m_walkState
+            ),
+            new KeyValuePair<ABaseState.TransitionDelegate, ABaseState>
+            (
+                () => PlayerInFOV(), m_attackState
+            ));
         
-        
-        private ABaseState m_activeState;
-        private SheepIdleState m_idleState;
+        m_attackState.SheepInit(this, new KeyValuePair<ABaseState.TransitionDelegate, ABaseState>
+            (
+                () => Test(), m_idleState
+            ));
+        //
+        // m_resetState.SheepInit(this, new KeyValuePair<ABaseState.TransitionDelegate, ABaseState>
+        // (
+        //     
+        // ));
+        //
+        // m_walkState.SheepInit(this, new KeyValuePair<ABaseState.TransitionDelegate, ABaseState>
+        // (
+        //     
+        // ));
 
-        private void Start()
+        m_activeState = m_idleState;
+    }
+
+    private void Update()
+    {
+        if (m_activeState is object)
         {
-            m_Agent = GetComponent<NavMeshAgent>();
-            OriginalPosition = transform.position;
-            OriginalRotation = transform.rotation;
+            m_activeState.Update();
 
-            m_idleState = new SheepIdleState();
-            SheepAttackState m_attackState = new SheepAttackState();
-            SheepResetState m_resetState = new SheepResetState();
-            SheepWalkState m_walkState = new SheepWalkState();
-
-            // m_idleState.SheepInit(this, new KeyValuePair<ABaseState.TransitionDelegate, ABaseState>
-            // (
-            //     () => 
-            // ));
-            //
-            // m_attackState.SheepInit(this, new KeyValuePair<ABaseState.TransitionDelegate, ABaseState>
-            // (
-            //     () => 
-            // ));
-            //
-            // m_resetState.SheepInit(this, new KeyValuePair<ABaseState.TransitionDelegate, ABaseState>
-            // (
-            //     () => 
-            // ));
-            //
-            // m_walkState.SheepInit(this, new KeyValuePair<ABaseState.TransitionDelegate, ABaseState>
-            // (
-            //     () => 
-            // ));
-        }
-
-        private void Update()
-        {
-            PlayerInFOV();
-            if (m_activeState is object)
+            if (m_activeState.IsFinished)
             {
-                m_activeState.Update();
+                m_activeState.Exit();
+                m_activeState = m_idleState;
+                m_activeState.Enter();
+            }
 
-                if (m_activeState.IsFinished)
+            foreach (var keyValuePair in m_activeState.Transitions)
+            {
+                if (keyValuePair.Key())
                 {
                     m_activeState.Exit();
-                    m_activeState = m_idleState;
-                    m_activeState.Enter();
-                }
-
-                foreach (var keyValuePair in m_activeState.Transitions)
-                {
-                    if (keyValuePair.Key())
-                    {
-                        m_activeState.Exit();
-                        m_activeState = keyValuePair.Value;
-                        if (!m_activeState.Enter())
-                            Debug.Log($"Konnte {m_activeState} nicht betretet!");
-                        break;
-                        ;
-                    }
+                    m_activeState = keyValuePair.Value;
+                    if (!m_activeState.Enter())
+                        Debug.Log($"Konnte {m_activeState} nicht betretet!");
+                    break;
                 }
             }
         }
+    }
 
-        public bool PlayerInFOV()
+    private bool PlayerInFOV()
+    {
+        Vector3 playerposition = GameManager.Instance.PlayerTransform.position;
+        Vector3 origin = transform.position + new Vector3(0, 1, 0);
+        Vector3 directionToPlayer = (playerposition + new Vector3(0, 1, 0)) -
+                                    origin;
+        // Debug.Log(Vector3.SignedAngle(dir, transform.forward, Vector3.forward));
+
+        if (Vector3.SignedAngle(directionToPlayer, transform.forward, Vector3.forward) <= m_fovAngle &&
+            Vector3.SignedAngle(directionToPlayer, transform.forward, Vector3.forward) >= -m_fovAngle)
         {
-            Vector3 playerposition = GameManager.Instance.PlayerTransform.position;
-            Vector3 origin = transform.position + new Vector3(0,1,0);
-            Vector3 directionToPlayer = (playerposition + new Vector3(0,1,0)) -
-                                        origin;
-            // Debug.Log(Vector3.SignedAngle(dir, transform.forward, Vector3.forward));
-
-            if (Vector3.SignedAngle(directionToPlayer, transform.forward, Vector3.forward) <= m_fovAngle &&
-                Vector3.SignedAngle(directionToPlayer, transform.forward, Vector3.forward) >= -m_fovAngle)
+            // Debug.Log("Player in FOV!");
+            RaycastHit hit;
+            if (Vector3.Distance(origin, playerposition) <= m_fovDistance)
             {
-                // Debug.Log("Player in FOV!");
-                RaycastHit hit;
-                if (Vector3.Distance(origin, playerposition) <= m_fovDistance)
+                if (Physics.Raycast(origin, directionToPlayer, out hit, m_fovDistance))
                 {
-                    if (Physics.Raycast(origin, directionToPlayer, out hit, m_fovDistance))
+                    if (hit.collider.gameObject.CompareTag("Player"))
                     {
-                        if (hit.collider.gameObject.CompareTag("Player"))
-                        {
-                            // Debug.Log("Player hit!");
-                            Debug.DrawRay(origin, directionToPlayer, Color.green,
-                                5f);
-                            return true;
-                        }
-                        else
-                        {
-                            // Debug.Log("Hit something else!");
-                            Debug.DrawRay(origin, directionToPlayer, Color.red, 5f);
-                            return false;
-                        }
+                        // Debug.Log("Player hit!");
+                        Debug.DrawRay(origin, directionToPlayer, Color.green,
+                            5f);
+                        return true;
                     }
                     else
                     {
-                        Debug.Log(("Can't Hit something!"));
+                        // Debug.Log("Hit something else!");
+                        Debug.DrawRay(origin, directionToPlayer, Color.red, 5f);
                         return false;
                     }
                 }
             }
-            else
-            {
-                // Debug.Log("Player behind FOV!");
-                return false;
-            }
-
-            return false;
         }
 
-        private void OnDrawGizmos()
-        {
-            Vector3 FovLine1 = Quaternion.AngleAxis(m_fovAngle, transform.up) * transform.forward * m_fovDistance;
-            Vector3 FovLine2 = Quaternion.AngleAxis(-m_fovAngle, transform.up) * transform.forward * m_fovDistance;
-            
-            Gizmos.color = Color.magenta;
-            Gizmos.DrawWireSphere(transform.position, m_fovDistance);
-            
-            Gizmos.color = Color.black;
-            Gizmos.DrawRay(transform.position,FovLine1);
-            Gizmos.DrawRay(transform.position,FovLine2);
+        return false;
+    }
 
-        }
+    private bool Test()
+    {
+        return m_currentHealthPoints < 10000000f;
+    }
+    private void OnDrawGizmos()
+    {
+        Vector3 FovLine1 = Quaternion.AngleAxis(m_fovAngle, transform.up) * transform.forward * m_fovDistance;
+        Vector3 FovLine2 = Quaternion.AngleAxis(-m_fovAngle, transform.up) * transform.forward * m_fovDistance;
+
+        Gizmos.color = Color.magenta;
+        Gizmos.DrawWireSphere(transform.position, m_fovDistance);
+
+        Gizmos.color = Color.black;
+        Gizmos.DrawRay(transform.position, FovLine1);
+        Gizmos.DrawRay(transform.position, FovLine2);
     }
 }
