@@ -1,17 +1,24 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using TreeEditor;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Utilities;
 
 public class PlayerController : MonoBehaviour
 {
+    private InteractableObjects m_interactableObject = null;
     private CharacterController m_controller = null;
     private Animator m_anim = null;
     private PlayerInputs m_inputs = null;
     private Transform m_mainCameraTransform = null;
 
     //private variables
-    [SerializeField, Tooltip("Speed in which the Character moves.")] private float m_movementSpeed = 5.0f;
+    [SerializeField, Tooltip("Speed in which the Character moves.")]
+    private float m_movementSpeed = 5.0f;
+
     private float m_currentSpeed = 0f;
     private float m_speedSmoothVelocity = 0f;
     private float m_speedSmoothTime = 0.1f;
@@ -33,6 +40,7 @@ public class PlayerController : MonoBehaviour
         m_mainCameraTransform = Camera.main.transform;
 
         #region Input Action
+
         m_inputs.Player.Dodge.performed += _ => Dodge();
         m_inputs.Player.LightAttack.performed += _ => LightAttack();
         m_inputs.Player.HeavyAttack.performed += _ => HeavyAttack();
@@ -43,22 +51,25 @@ public class PlayerController : MonoBehaviour
         m_inputs.Player.SwitchItems.performed += _ => SwitchItems(m_inputs.Player.SwitchItems.ReadValue<float>());
         m_inputs.Player.OpenInventory.performed += _ => OpenInventory();
         m_inputs.Player.OpenMenu.performed += _ => OpenMenu();
+
         #endregion
     }
 
     private void Start()
     {
-        //Cursor.lockState = CursorLockMode.Locked;
-        //Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
         Debug.Log(Application.persistentDataPath);
     }
+
     private void Update()
     {
         Movement(m_inputs.Player.Movement.ReadValue<Vector2>());
         Gravity();
+        LookForInteractables();
     }
 
-    public void Movement(/*InputAction.CallbackContext*/Vector2 _context)
+    public void Movement( /*InputAction.CallbackContext*/ Vector2 _context)
     {
         if (_context != Vector2.zero)
         {
@@ -77,18 +88,20 @@ public class PlayerController : MonoBehaviour
 
             if (desiredMoveDirection != Vector3.zero)
             {
-                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(desiredMoveDirection), m_rotationSpeed);
+                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(desiredMoveDirection),
+                    m_rotationSpeed);
             }
 
             float targetSpeed = m_movementSpeed * movementInput.magnitude;
             if (isSprinting)
                 m_currentSpeed = 13;
             else
-                m_currentSpeed = Mathf.SmoothDamp(m_currentSpeed, targetSpeed, ref m_speedSmoothVelocity, m_speedSmoothTime);
+                m_currentSpeed = Mathf.SmoothDamp(m_currentSpeed, targetSpeed, ref m_speedSmoothVelocity,
+                    m_speedSmoothTime);
 
             m_controller.Move(desiredMoveDirection * m_currentSpeed * Time.deltaTime);
-
         }
+
         //m_anim.SetFloat("MovementSpeed", _context.magnitude);
     }
 
@@ -138,7 +151,11 @@ public class PlayerController : MonoBehaviour
 
     public void Interaction()
     {
-        Debug.Log("Interaction");
+        if (m_interactableObject != null)
+        {
+            m_interactableObject.Use();
+            m_interactableObject = null;
+        }
     }
 
     public void SwitchItems(float _context)
@@ -156,6 +173,7 @@ public class PlayerController : MonoBehaviour
         Debug.Log("Open Menu");
     }
 
+    #region OnEnable & OnDisable
     private void OnEnable()
     {
         m_inputs.Enable();
@@ -165,6 +183,31 @@ public class PlayerController : MonoBehaviour
     {
         m_inputs.Disable();
     }
+    #endregion
+
+    private void LookForInteractables()
+    {
+        //TODO: UI for Chest, Door, NPC
+        if (InteractManager.Instance.interactables.Count> 0)
+        {
+            foreach (InteractableObjects _object in InteractManager.Instance.interactables)
+            {
+                if (Vector3.Distance(transform.position, _object.transform.position) <= 2.5f)
+                {
+                    m_interactableObject = _object;
+                }
+            }
+        }
+
+        if (m_interactableObject != null)
+        {
+            if (Vector3.Distance(transform.position, m_interactableObject.gameObject.transform.position) > 2.5f)
+            {
+                m_interactableObject = null;
+            }
+        }
+    }
+
 
     private void OnGUI()
     {
@@ -173,7 +216,7 @@ public class PlayerController : MonoBehaviour
             m_CurrentHealth -= 10;
         }
 
-        if (GUI.Button(new Rect(10, 150, 150, 100), "Save" ))
+        if (GUI.Button(new Rect(10, 150, 150, 100), "Save"))
         {
             DataManager.Instance.SavePlayer(this);
             Debug.Log("Saved");
@@ -193,6 +236,5 @@ public class PlayerController : MonoBehaviour
 
             Debug.Log(temppos);
         }
-
     }
 }
