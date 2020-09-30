@@ -9,6 +9,7 @@ using UnityEngine.InputSystem.Utilities;
 
 public class PlayerController : MonoBehaviour
 {
+    private InteractableObjects m_interactableObject = null;
     private CharacterController m_controller = null;
     private Animator m_anim = null;
     private PlayerInputs m_inputs = null;
@@ -95,7 +96,7 @@ public class PlayerController : MonoBehaviour
             if (isSprinting)
                 m_currentSpeed = 13;
             else
-                m_currentSpeed = Mathf.SmoothDamp(m_currentSpeed, TargetSpeed, ref m_speedSmoothVelocity,
+                m_currentSpeed = Mathf.SmoothDamp(m_currentSpeed, targetSpeed, ref m_speedSmoothVelocity,
                     m_speedSmoothTime);
 
             m_controller.Move(desiredMoveDirection * m_currentSpeed * Time.deltaTime);
@@ -150,7 +151,11 @@ public class PlayerController : MonoBehaviour
 
     public void Interaction()
     {
-        Debug.Log("Interaction");
+        if (m_interactableObject != null)
+        {
+            m_interactableObject.Use();
+            m_interactableObject = null;
+        }
     }
 
     public void SwitchItems(float _context)
@@ -168,6 +173,7 @@ public class PlayerController : MonoBehaviour
         Debug.Log("Open Menu");
     }
 
+    #region OnEnable & OnDisable
     private void OnEnable()
     {
         m_inputs.Enable();
@@ -177,18 +183,27 @@ public class PlayerController : MonoBehaviour
     {
         m_inputs.Disable();
     }
+    #endregion
 
     private void LookForInteractables()
     {
-        float radius = 3f;
-
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, radius);
-
-        foreach (var hitcol in hitColliders)
+        //TODO: UI for Chest, Door, NPC
+        if (InteractManager.Instance.interactables.Count> 0)
         {
-            if (hitcol.gameObject.CompareTag("Interactable") == true)
+            foreach (InteractableObjects _object in InteractManager.Instance.interactables)
             {
-                hitcol.gameObject.GetComponent<InteractWithMeRalf>().Use();
+                if (Vector3.Distance(transform.position, _object.transform.position) <= 2.5f)
+                {
+                    m_interactableObject = _object;
+                }
+            }
+        }
+
+        if (m_interactableObject != null)
+        {
+            if (Vector3.Distance(transform.position, m_interactableObject.gameObject.transform.position) > 2.5f)
+            {
+                m_interactableObject = null;
             }
         }
     }
