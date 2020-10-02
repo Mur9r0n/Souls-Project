@@ -61,10 +61,10 @@ public class SheepController : MonoBehaviour
         //     
         // ));
         //
-        // m_walkState.SheepInit(this, new KeyValuePair<ABaseState.TransitionDelegate, ABaseState>
-        // (
-        //     
-        // ));
+        m_walkState.SheepInit(this, new KeyValuePair<ABaseState.TransitionDelegate, ABaseState>
+            (
+                () => Test(), m_idleState
+            ));
 
         m_activeState = m_idleState;
     }
