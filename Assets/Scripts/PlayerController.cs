@@ -97,16 +97,15 @@ public class PlayerController : MonoBehaviour
             if (isSprinting)
                 m_currentSpeed = 13;
             else
-                m_currentSpeed = Mathf.SmoothDamp(m_currentSpeed, TargetSpeed, ref m_speedSmoothVelocity,
+                m_currentSpeed = Mathf.SmoothDamp(m_currentSpeed, targetSpeed, ref m_speedSmoothVelocity,
                     m_speedSmoothTime);
 
             m_controller.Move(desiredMoveDirection * m_currentSpeed * Time.deltaTime);
         }
 
-            if (!m_cinemachineFreeLook.m_RecenterToTargetHeading.m_enabled)
-            {
-                m_cinemachineFreeLook.m_RecenterToTargetHeading.m_enabled = true;
-            }
+        if(!m_cinemachineFreeLook.m_RecenterToTargetHeading.m_enabled)
+        {
+            m_cinemachineFreeLook.m_RecenterToTargetHeading.m_enabled = true;
         }
         else
         {
@@ -185,6 +184,7 @@ public class PlayerController : MonoBehaviour
     }
 
     #region OnEnable & OnDisable
+
     private void OnEnable()
     {
         m_inputs.Enable();
@@ -194,12 +194,13 @@ public class PlayerController : MonoBehaviour
     {
         m_inputs.Disable();
     }
+
     #endregion
 
     private void LookForInteractables()
     {
         //TODO: UI for Chest, Door, NPC
-        if (InteractManager.Instance.interactables.Count> 0)
+        if (InteractManager.Instance.interactables.Count > 0)
         {
             foreach (InteractableObjects _object in InteractManager.Instance.interactables)
             {

@@ -58,7 +58,7 @@ public abstract class ABaseState
 
     public virtual bool Enter()
     {
-        Debug.Log($"Entered {this}!");
+        // Debug.Log($"Entered {this}!");
         IsFinished = false;
         return true;
     }
@@ -67,6 +67,6 @@ public abstract class ABaseState
 
     public virtual void Exit()
     {
-        Debug.Log($"Exit {this}!");
+        // Debug.Log($"Exit {this}!");
     }
 }

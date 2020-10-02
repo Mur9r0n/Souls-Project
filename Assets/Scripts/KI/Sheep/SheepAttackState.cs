@@ -5,7 +5,7 @@ public class SheepAttackState : ABaseState
     public override void Update()
     {
         Debug.Log(m_controller);
-        Debug.Log("Hier wäre die Update! SheepAttackState");
+        // Debug.Log("Hier wäre die Update! SheepAttackState");
     }
     // public override bool Enter()
     // {

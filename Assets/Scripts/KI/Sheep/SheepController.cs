@@ -89,7 +89,7 @@ public class SheepController : MonoBehaviour
                     m_activeState.Exit();
                     m_activeState = keyValuePair.Value;
                     if (!m_activeState.Enter())
-                        Debug.Log($"Konnte {m_activeState} nicht betretet!");
+                        // Debug.Log($"Konnte {m_activeState} nicht betretet!");
                     break;
                 }
             }
