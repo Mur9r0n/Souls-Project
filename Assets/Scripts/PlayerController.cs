@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using TreeEditor;
-using UnityEditor;
+using Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Utilities;
@@ -15,7 +14,9 @@ public class PlayerController : MonoBehaviour
     private PlayerInputs m_inputs = null;
     private Transform m_mainCameraTransform = null;
 
-    //private variables
+    [SerializeField, Tooltip("FreeLookCamera to Follow the Player.")]
+    private CinemachineFreeLook m_cinemachineFreeLook = null;
+
     [SerializeField, Tooltip("Speed in which the Character moves.")]
     private float m_movementSpeed = 5.0f;
 
@@ -24,10 +25,11 @@ public class PlayerController : MonoBehaviour
     private float m_speedSmoothTime = 0.1f;
     private float m_rotationSpeed = 0.1f;
 
+    [SerializeField, Tooltip("Enable Gravity?")]
+    private bool m_useGravity = true;
 
-    //public variables
-    public int m_MaxHealth = 100;
-    public int m_CurrentHealth = 80;
+    [Tooltip("Maximum Healthpoints.")] public int m_MaxHealth = 100;
+    [Tooltip("Current Healthpoints.")] public int m_CurrentHealth = 80;
 
     //TEST
     bool isSprinting = false;
@@ -57,15 +59,14 @@ public class PlayerController : MonoBehaviour
 
     private void Start()
     {
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-        Debug.Log(Application.persistentDataPath);
+        //Cursor.lockState = CursorLockMode.Locked;
+        //Cursor.visible = false;
     }
 
     private void Update()
     {
         Movement(m_inputs.Player.Movement.ReadValue<Vector2>());
-        Gravity();
+        if (m_useGravity) Gravity();
         LookForInteractables();
     }
 
@@ -96,10 +97,20 @@ public class PlayerController : MonoBehaviour
             if (isSprinting)
                 m_currentSpeed = 13;
             else
-                m_currentSpeed = Mathf.SmoothDamp(m_currentSpeed, targetSpeed, ref m_speedSmoothVelocity,
+                m_currentSpeed = Mathf.SmoothDamp(m_currentSpeed, TargetSpeed, ref m_speedSmoothVelocity,
                     m_speedSmoothTime);
 
             m_controller.Move(desiredMoveDirection * m_currentSpeed * Time.deltaTime);
+        }
+
+            if (!m_cinemachineFreeLook.m_RecenterToTargetHeading.m_enabled)
+            {
+                m_cinemachineFreeLook.m_RecenterToTargetHeading.m_enabled = true;
+            }
+        }
+        else
+        {
+            m_cinemachineFreeLook.m_RecenterToTargetHeading.m_enabled = false;
         }
 
         //m_anim.SetFloat("MovementSpeed", _context.magnitude);
